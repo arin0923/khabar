@@ -48,6 +48,20 @@ const SOURCES = [
     googleQuery: 'Nepal news BBC',
     emoji: '🌐',
   },
+  {
+    name: 'Annapurna Post',
+    key:  'annapurnapost',
+    url:  'https://annapurnapost.com/feed',
+    googleQuery: 'Nepal news annapurna post',
+    emoji: '🏔️',
+  },
+  {
+    name: 'Baahrakhari',
+    key:  'baahrakhari',
+    url:  'https://baahrakhari.com/feed',
+    googleQuery: 'Nepal news baahrakhari',
+    emoji: '📡',
+  },
 ];
 
 // ── Google News RSS URL ────────────────────────────────────────
