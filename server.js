@@ -239,9 +239,8 @@ async function refreshCache() {
     }
   }
 
-  // Sort & deduplicate
-  allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
-  const seen    = new Set();
+  // Deduplicate by title
+  const seen = new Set();
   const deduped = allArticles.filter(a => {
     const k = a.title.toLowerCase().slice(0, 55);
     if (seen.has(k)) return false;
@@ -249,7 +248,28 @@ async function refreshCache() {
     return true;
   });
 
-  cache.articles    = deduped;
+  // Round-robin interleave: rotate articles across sources so the feed
+  // shows variety — KTM Post #1, OnlineKhabar #1, Setopati #1 ... repeat
+  const bySource = {};
+  for (const a of deduped) {
+    if (!bySource[a.sourceKey]) bySource[a.sourceKey] = [];
+    bySource[a.sourceKey].push(a);
+  }
+  // Sort each bucket newest-first
+  for (const key of Object.keys(bySource)) {
+    bySource[key].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+  // Interleave round-robin across buckets
+  const buckets = Object.values(bySource);
+  const maxLen  = Math.max(...buckets.map(b => b.length));
+  const interleaved = [];
+  for (let i = 0; i < maxLen; i++) {
+    for (const bucket of buckets) {
+      if (bucket[i]) interleaved.push(bucket[i]);
+    }
+  }
+
+  cache.articles    = interleaved;
   cache.lastUpdated = new Date().toISOString();
   cache.fetchLog    = fetchLog;
   cache.fetchingNow = false;
