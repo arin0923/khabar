@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Khabar — Nepal News</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #f5f3ef;
+      --surface:         #ffffff;
+      --border:          #e6e1da;
+      --text-primary:    #18160f;
+      --text-secondary:  #68625c;
+      --text-muted:      #a09890;
+      --accent:          #c0392b;
+      --accent-light:    #fdf0ee;
+      --shadow-sm:       0 1px 4px rgba(0,0,0,0.06);
+      --shadow-md:       0 4px 16px rgba(0,0,0,0.09);
+      --shadow-lg:       0 8px 36px rgba(0,0,0,0.13);
+      --radius:          14px;
+      --radius-sm:       8px;
+      --transition:      0.22s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(245,243,239,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 28px;
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-word {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 28px;
+      letter-spacing: -0.8px;
+      color: var(--text-primary);
+    }
+
+    .logo-dot { color: var(--accent); }
+
+    .logo-tagline {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: var(--accent-light);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: blink 1.8s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.4; transform:scale(0.7); }
+    }
+
+    .last-updated {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .refresh-btn:hover {
+      border-color: var(--text-primary);
+      color: var(--text-primary);
+    }
+
+    .refresh-btn svg { transition: transform 0.6s; }
+    .refresh-btn.spinning svg { animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Filters ── */
+    .filter-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 66px;
+      z-index: 100;
+    }
+
+    .filter-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    .categories {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      height: 52px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .categories::-webkit-scrollbar { display: none; }
+
+    .pill {
+      flex-shrink: 0;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .pill:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .pill.active { background: var(--text-primary); color: var(--bg); border-color: var(--text-primary); }
+
+    .source-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .source-row::-webkit-scrollbar { display: none; }
+
+    .src-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-right: 2px;
+    }
+
+    .src-chip {
+      flex-shrink: 0;
+      padding: 4px 13px;
+      border-radius: 100px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .src-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .src-chip.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+    /* ── Main ── */
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 28px 28px 80px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .count-badge {
+      font-size: 13px;
+      color: var(--text-muted);
+      background: var(--border);
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+
+    /* ── Hero Card ── */
+    .hero-card {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      min-height: 340px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      color: inherit;
+      margin-bottom: 20px;
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+
+    .hero-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .hero-body {
+      padding: 38px 38px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.22;
+      margin: 14px 0 16px;
+    }
+
+    .hero-excerpt {
+      font-size: 15.5px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .hero-img {
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .hero-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .hero-card:hover .hero-img img { transform: scale(1.05); }
+
+    .img-fallback {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #ede8e0 0%, #d9d2c8 100%);
+      font-size: 52px;
+    }
+
+    /* ── Card Meta ── */
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .src-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 5px;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .cat-pill {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .time {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .via-google {
+      font-size: 10px;
+      font-weight: 600;
+      color: #1a73e8;
+      background: #e8f0fe;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.03em;
+      flex-shrink: 0;
+    }
+
+    /* ── Grid ── */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-3px);
+    }
+
+    .card-img {
+      aspect-ratio: 16/9;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover .card-img img { transform: scale(1.06); }
+
+    .card-body {
+      padding: 18px 18px 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.38;
+    }
+
+    .card-excerpt {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.62;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ── More Stories List ── */
+    .more-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      padding-top: 8px;
+      border-top: 2px solid var(--border);
+    }
+
+    .list-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+
+    .list-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateX(4px);
+    }
+
+    .list-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--border);
+      min-width: 30px;
+      line-height: 1;
+    }
+
+    .list-body { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+    .list-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.42;
+    }
+
+    .list-thumb {
+      width: 76px; height: 56px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* ── Error / Loading / Empty ── */
+    .state-box {
+      text-align: center;
+      padding: 90px 20px;
+    }
+
+    .spinner {
+      width: 38px; height: 38px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    .state-icon { font-size: 42px; margin-bottom: 14px; }
+
+    .state-msg {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .state-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .retry-btn {
+      margin-top: 18px;
+      padding: 9px 22px;
+      background: var(--text-primary);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+
+    .retry-btn:hover { opacity: 0.82; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      padding: 12px 20px;
+      background: var(--text-primary);
+      color: var(--bg);
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 999;
+      transform: translateY(0);
+      opacity: 1;
+      transition: all 0.3s ease;
+    }
+
+    .toast.hidden { transform: translateY(20px); opacity: 0; pointer-events: none; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding: 22px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    footer strong { color: var(--accent); }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { animation: fadeUp 0.35s ease both; }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+      .hero-card { grid-template-columns: 1fr; }
+      .hero-img  { height: 240px; }
+      .hero-title{ font-size: 24px; }
+      .news-grid { grid-template-columns: repeat(2,1fr); }
+      .last-updated { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .header-inner { padding: 0 16px; }
+      main           { padding: 16px 16px 50px; }
+      .filter-inner  { padding: 0 16px; }
+      .news-grid     { grid-template-columns: 1fr; }
+      .logo-tagline  { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="/">
+      <span class="logo-word">Khabar<span class="logo-dot">.</span></span>
+      <span class="logo-tagline">Nepal News</span>
+    </a>
+    <div class="header-right">
+      <div class="live-pill"><div class="live-dot"></div>Live</div>
+      <span class="last-updated" id="lastUpdated"></span>
+      <button class="refresh-btn" id="refreshBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <div class="categories" id="cats">
+      <button class="pill active" data-cat="all">All News</button>
+      <button class="pill" data-cat="politics">Politics</button>
+      <button class="pill" data-cat="business">Business</button>
+      <button class="pill" data-cat="sports">Sports</button>
+      <button class="pill" data-cat="technology">Technology</button>
+      <button class="pill" data-cat="health">Health</button>
+      <button class="pill" data-cat="world">World</button>
+      <button class="pill" data-cat="entertainment">Entertainment</button>
+    </div>
+    <div class="source-row" id="srcs">
+      <span class="src-label">Sources</span>
+      <button class="src-chip active" data-src="all">All</button>
+      <button class="src-chip" data-src="ktmpost">KTM Post</button>
+      <button class="src-chip" data-src="onlinekhabar">OnlineKhabar</button>
+      <button class="src-chip" data-src="setopati">Setopati</button>
+      <button class="src-chip" data-src="ratopati">Ratopati</button>
+      <button class="src-chip" data-src="bbcnepali">BBC Nepal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Content -->
+<main id="app">
+  <div class="state-box">
+    <div class="spinner"></div>
+    <p class="state-msg">Fetching the latest news from Nepal…</p>
+  </div>
+</main>
+
+<!-- Toast -->
+<div class="toast hidden" id="toast"></div>
+
+<footer>
+  <strong>Khabar</strong> — Nepal in one page<br/>
+  Sources: <strong>Kathmandu Post · OnlineKhabar · Setopati · Ratopati · BBC Nepal</strong><br/>
+  News refreshes automatically every 10 minutes
+</footer>
+
+<script>
+const API = ''; // same origin — server serves this file from /public
+
+let state = {
+  articles:    [],
+  category:    'all',
+  source:      'all',
+  loading:     true,
+  lastUpdated: null,
+};
+
+// ── Time helper ────────────────────────────────────────────────
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  const s = (Date.now() - d) / 1000;
+  if (s < 60)    return 'Just now';
+  if (s < 3600)  return Math.floor(s/60)   + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+// ── Render helpers ─────────────────────────────────────────────
+function imgTag(src, emoji, cls='card-img') {
+  if (src) {
+    return `<div class="${cls}">
+      <img src="${src}" alt="" loading="lazy"
+           onerror="this.parentElement.innerHTML='<div class=\\'img-fallback\\'>${emoji}</div>'">
+    </div>`;
+  }
+  return `<div class="${cls}"><div class="img-fallback">${emoji}</div></div>`;
+}
+
+function meta(a) {
+  const googleBadge = a.viaGoogle
+    ? `<span class="via-google" title="Fetched via Google News (direct RSS unavailable)">G</span>`
+    : '';
+  return `<div class="meta">
+    <span class="src-badge">${a.source}</span>
+    <span class="cat-pill">${a.category}</span>
+    ${googleBadge}
+    <span class="time">${timeAgo(a.date)}</span>
+  </div>`;
+}
+
+function heroCard(a) {
+  return `<a class="hero-card fade-in" href="${a.link}" target="_blank" rel="noopener noreferrer">
+    <div class="hero-body">
+      <div>
+        ${meta(a)}
+        <h2 class="hero-title">${a.title}</h2>
+        <p class="hero-excerpt">${a.excerpt}</p>
+      </div>
+    </div>
+    ${imgTag(a.image, a.emoji, 'hero-img')}
+  </a>`;
+}
+
+function gridCard(a, i) {
+  return `<a class="card fade-in" href="${a.link}" target="_blank" rel="noopener noreferrer"
+            style="animation-delay:${i*0.05}s">
+    ${imgTag(a.image, a.emoji)}
+    <div class="card-body">
+      ${meta(a)}
+      <div class="card-title">${a.title}</div>
+      <div class="card-excerpt">${a.excerpt}</div>
+    </div>
+  </a>`;
+}
+
+function listCard(a, idx) {
+  return `<a class="list-card fade-in" href="${a.link}" target="_blank" rel="noopener noreferrer"
+            style="animation-delay:${idx*0.04}s">
+    <div class="list-num">${String(idx+1).padStart(2,'0')}</div>
+    <div class="list-body">
+      ${meta(a)}
+      <div class="list-title">${a.title}</div>
+    </div>
+    ${a.image ? `<img class="list-thumb" src="${a.image}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+  </a>`;
+}
+
+// ── Render ─────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+
+  if (state.loading) {
+    app.innerHTML = `<div class="state-box">
+      <div class="spinner"></div>
+      <p class="state-msg">Fetching the latest news from Nepal…</p>
+    </div>`;
+    return;
+  }
+
+  const articles = state.articles;
+
+  if (articles.length === 0) {
+    app.innerHTML = `<div class="state-box">
+      <div class="state-icon">🔍</div>
+      <p class="state-msg">No articles found for this filter.</p>
+      <p class="state-sub">Try a different category or source.</p>
+    </div>`;
+    return;
+  }
+
+  const [hero, ...rest] = articles;
+  const gridItems = rest.slice(0, 6);
+  const listItems = rest.slice(6, 28);
+
+  app.innerHTML = `
+    <div class="section-head">
+      <h1 class="section-title">Top Stories</h1>
+      <span class="count-badge">${articles.length} articles</span>
+    </div>
+    ${heroCard(hero)}
+    <div class="news-grid">
+      ${gridItems.map((a, i) => gridCard(a, i)).join('')}
+    </div>
+    ${listItems.length ? `
+      <div class="more-title">More Stories</div>
+      ${listItems.map((a, i) => listCard(a, i)).join('')}
+    ` : ''}
+  `;
+
+  // Update last-updated label
+  if (state.lastUpdated) {
+    const d = new Date(state.lastUpdated);
+    document.getElementById('lastUpdated').textContent =
+      'Updated ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  }
+}
+
+// ── Fetch from backend API ─────────────────────────────────────
+async function fetchNews(showSpinner = false) {
+  if (showSpinner) {
+    state.loading = true;
+    render();
+  }
+
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+
+  try {
+    const params = new URLSearchParams({ limit: 60 });
+    if (state.category !== 'all') params.set('category', state.category);
+    if (state.source   !== 'all') params.set('source',   state.source);
+
+    const res  = await fetch(`/api/news?${params}`);
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const data = await res.json();
+
+    state.articles    = data.articles;
+    state.lastUpdated = data.lastUpdated;
+    state.loading     = false;
+    render();
+  } catch (err) {
+    state.loading = false;
+    console.error(err);
+    if (state.articles.length === 0) {
+      document.getElementById('app').innerHTML = `<div class="state-box">
+        <div class="state-icon">📡</div>
+        <p class="state-msg">Could not connect to the server.</p>
+        <p class="state-sub">${err.message}</p>
+        <button class="retry-btn" onclick="fetchNews(true)">Try Again</button>
+      </div>`;
+    } else {
+      showToast('⚠️ Could not refresh — showing cached news');
+    }
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// ── Manual refresh → trigger backend cache refresh ─────────────
+async function triggerRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  try {
+    await fetch('/api/refresh', { method: 'POST' });
+    showToast('🔄 Refreshing news sources…');
+    setTimeout(() => fetchNews(), 3000); // give server time to fetch
+  } catch {
+    fetchNews();
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3500);
+}
+
+// ── Events ────────────────────────────────────────────────────
+document.getElementById('refreshBtn').addEventListener('click', triggerRefresh);
+
+document.getElementById('cats').addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if (!btn) return;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  state.category = btn.dataset.cat;
+  fetchNews();
+});
+
+document.getElementById('srcs').addEventListener('click', e => {
+  const chip = e.target.closest('.src-chip');
+  if (!chip) return;
+  document.querySelectorAll('.src-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  state.source = chip.dataset.src;
+  fetchNews();
+});
+
+// ── Auto-refresh every 10 min ─────────────────────────────────
+fetchNews(true);
+setInterval(() => fetchNews(), 10 * 60 * 1000);
+</script>
+</body>
+</html>
