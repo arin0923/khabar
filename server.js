@@ -299,8 +299,15 @@ async function refreshCache() {
 // ── Routes ─────────────────────────────────────────────────────
 
 app.get('/api/news', (req, res) => {
-  const { category, source, limit = 60 } = req.query;
-  let articles = [...cache.articles];
+  const { category, source, limit = 75 } = req.query;
+  
+  // Filter out articles older than 2 weeks
+  const twoWeeksAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
+  let articles = cache.articles.filter(a => {
+    if (!a.date) return true; // keep if no date
+    const pubTime = new Date(a.date).getTime();
+    return !isNaN(pubTime) && pubTime >= twoWeeksAgo;
+  });
   if (category && category !== 'all') articles = articles.filter(a => a.category === category);
   if (source   && source   !== 'all') articles = articles.filter(a => a.sourceKey === source);
   res.json({

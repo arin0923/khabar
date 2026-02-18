@@ -788,7 +788,7 @@ async function fetchNews(showSpinner = false) {
   btn.classList.add('spinning');
 
   try {
-    const params = new URLSearchParams({ limit: 60 });
+    const params = new URLSearchParams({ limit: 75 });
     if (state.category !== 'all') params.set('category', state.category);
     if (state.source   !== 'all') params.set('source',   state.source);
 
